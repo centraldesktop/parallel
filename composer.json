@@ -1,6 +1,6 @@
 {
     "name": "centraldesktop/parallel",
-    "description": "Easily allows forking up to a max number or processes",
+    "description": "Easily allows forking up to a max number of processes",
 
     "license": "Apache-2.0",
 
