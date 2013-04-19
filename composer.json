@@ -1,0 +1,27 @@
+{
+    "name": "centraldesktop/parallel",
+    "description": "Easily allows forking up to a max number or processes",
+
+    "license": "Apache-2.0",
+
+    "require": {
+        "php": ">=5.3.6",
+        "ext-pcntl": "*",
+        "ext-posix": "*",
+        "psr/log": "~1.0"
+    },
+
+
+    "require-dev": {
+        "phpunit/phpunit": ">=3.7.0",
+        "phpmd/phpmd": "1.4.*",
+        "pdepend/pdepend": "1.1.0",
+        "squizlabs/php_codesniffer": "1.4.5"
+    },
+
+    "autoload": {
+        "psr-0": {
+            "CentralDesktop": "src/"
+        }
+    }
+}
