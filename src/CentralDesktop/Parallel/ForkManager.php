@@ -51,25 +51,14 @@ class ForkManager implements LoggerAwareInterface {
 
     public
     function __construct($processes = 4, $use_default_sighandler = true) {
-        $this->logger      = new NullLogger();
+        $this->logger        = new NullLogger();
         $this->max_processes = $processes;
 
-        CD_ForkManager::$fms[] = $this;
+        self::$fms[] = $this;
 
         // Verify that 'declare(ticks=1)' has been called by the caller.  We only need this done once.
         if (!self::$have_ticks) {
-            register_tick_function('verify_declare_ticks');
-
-            // This is a short NOP+microsleep, just to give verify_declare_ticks() a change to verify.
-            $i = 0;
-            $i++;
-            $i++;
-            $i++;
-            time_nanosleep(0, 5000);
-
-            if (self::$have_ticks) {
-                unregister_tick_function('verify_declare_ticks');
-            }
+            $this->setup_ticks();
         }
 
         if ($use_default_sighandler) {
@@ -82,27 +71,42 @@ class ForkManager implements LoggerAwareInterface {
         return $this->active;
     }
 
+    public static
+    function confirmTicks() {
+        self::$have_ticks = true;
+    }
+
+    private
+    function setup_ticks() {
+        $tick_f = function () {
+            ForkManager::confirmTicks();
+        };
+        register_tick_function($tick_f);
+
+
+        // This is a short NOP+microsleep, just to give verify_declare_ticks() a change to verify.
+        $i = 0;
+        $i++;
+        $i++;
+        $i++;
+        time_nanosleep(0, 5000);
+
+
+        if (self::$have_ticks) {
+            //unregister_tick_function($tick_f);
+        }
+        else {
+            die("ForkManager requires a 'declare(ticks=1);' in the calling code.\n");
+        }
+    }
+
     public
     function start($id = "Some Random Process") {
         // If the __construct() test failed, retest now.
         if (!self::$have_ticks) {
-            register_tick_function('verify_declare_ticks');
-
-            // This is a short NOP+microsleep, just to give verify_declare_ticks() a change to verify.
-            $i = 0;
-            $i++;
-            $i++;
-            $i++;
-            time_nanosleep(0, 5000);
-
-
-            if (self::$have_ticks) {
-                unregister_tick_function('verify_declare_ticks');
-            }
-            else {
-                die("CD_ForkManager requires a 'declare(ticks=1);' in the calling code.\n");
-            }
+            $this->setup_ticks();
         }
+
         $pid = pcntl_fork();
 
         if ($pid == -1) {
@@ -141,7 +145,9 @@ class ForkManager implements LoggerAwareInterface {
             // Setup signal handlers, if any
             foreach (self::$trapped_signals as $signo) {
                 if (is_null($this->child_handler)) {
-                    pcntl_signal($signo, 'fm_exit');
+                    pcntl_signal($signo, function ($signo) {
+                        exit($signo);
+                    });
                 }
                 else {
                     pcntl_signal($signo, $this->child_handler);
@@ -214,7 +220,7 @@ class ForkManager implements LoggerAwareInterface {
      */
     public static
     function shutdown_all($sig = SIGINT) {
-        foreach (CD_ForkManager::$fms as $fm) {
+        foreach (self::$fms as $fm) {
             $fm->shutdown($sig);
         }
     }
@@ -258,7 +264,9 @@ class ForkManager implements LoggerAwareInterface {
         $this->parent_handler = null;
 
         foreach (self::$trapped_signals as $signo) {
-            pcntl_signal($signo, 'fm_exit');
+            pcntl_signal($signo, function ($signo) {
+                exit($signo);
+            });
         }
     }
 
@@ -291,11 +299,3 @@ class ForkManager implements LoggerAwareInterface {
     }
 }
 
-function verify_declare_ticks() {
-    CD_ForkManager::$have_ticks = true;
-}
-
-// Not sure why, but pcntl_signal() says 'exit' is not a callable function.  Probably because it has that dual exit; / exit(0); notation.
-function fm_exit($signo) {
-    exit($signo);
-}

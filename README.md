@@ -13,6 +13,9 @@ use CentralDesktop\Paralell\ForkManager;
 
 // build an object, limit to total concurrent processes.
 
+*You must declare(ticks = 1); in order for signal handing to work properly in PHP*
+
+
 > $fm = new ForkManager(10);
 > $fm->start();
 >
