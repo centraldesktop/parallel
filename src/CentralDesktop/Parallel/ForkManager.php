@@ -47,7 +47,9 @@ class ForkManager implements LoggerAwareInterface {
     private $logger;
 
     // Signals that we trap by default
-    protected static $trapped_signals = array(SIGHUP, SIGINT, SIGABRT, SIGTERM, SIGQUIT);
+    protected static $trapped_signals = array(
+        SIGHUP, SIGINT, SIGABRT, SIGTERM, SIGQUIT
+    );
 
     public
     function __construct($processes = 4, $use_default_sighandler = true) {
@@ -56,7 +58,8 @@ class ForkManager implements LoggerAwareInterface {
 
         self::$fms[] = $this;
 
-        // Verify that 'declare(ticks=1)' has been called by the caller.  We only need this done once.
+        // Verify that 'declare(ticks=1)' has been called by the caller.
+        // We only need this done once.
         if (!self::$have_ticks) {
             $this->setup_ticks();
         }
@@ -84,7 +87,8 @@ class ForkManager implements LoggerAwareInterface {
         register_tick_function($tick_f);
 
 
-        // This is a short NOP+microsleep, just to give verify_declare_ticks() a change to verify.
+        // This is a short NOP+microsleep, just to
+        // give verify_declare_ticks() a change to verify.
         $i = 0;
         $i++;
         $i++;
@@ -96,7 +100,7 @@ class ForkManager implements LoggerAwareInterface {
             //unregister_tick_function($tick_f);
         }
         else {
-            die("ForkManager requires a 'declare(ticks=1);' in the calling code.\n");
+            die("FM requires a 'declare(ticks=1);' in the calling code.\n");
         }
     }
 
@@ -120,11 +124,18 @@ class ForkManager implements LoggerAwareInterface {
             if (count(array_keys($this->pids)) >= $this->max_processes) {
                 // wait for child to finish so we can start another.
 
-                // PHP doesn't dispatch signals while we're waiting in pcntl_wait(). All signals are queued up, and dispatched when it exits.
-                // But that doesn't work for ForkManager, because I need to receive the signal to start killing child processes... chicken and egg...
-                // Instead, poll pcntl_wait() instead of blocking.  If nothing exitted, and we're still supposed to run, poll
+                // PHP doesn't dispatch signals while we're waiting in pcntl_wait().
+                // All signals are queued up, and dispatched when it exits.
+                // But that doesn't work for ForkManager, because I need to receive
+                // the signal to start killing child processes... chicken and egg...
+                // Instead, poll pcntl_wait() instead of blocking.  If nothing
+                // exitted, and we're still supposed to run, poll
                 while ($this->alive()) {
-                    $status   = 0; // $status is a reference to a variable that stores $? plus some more crap for the child that exitted
+                    /**
+                     * @var $status int is a reference to a variable that stores $?
+                     * plus some more crap for the child that exitted
+                     */
+                    $status   = 0;
                     $childpid = pcntl_wait($status, WNOHANG);
                     if ($childpid === 0) {
                         pcntl_signal_dispatch();
