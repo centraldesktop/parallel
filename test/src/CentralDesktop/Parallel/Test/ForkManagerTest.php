@@ -64,4 +64,9 @@ class ForkManagerTest extends \PHPUnit_Framework_TestCase {
         $this->assertTrue($has_announce, "FM Never announced a thread");
         $this->assertTrue($testH->hasInfo($test_text), "FM never got to the fork body");
     }
+    
+    public
+    function testNothing(){
+
+    }
 }
