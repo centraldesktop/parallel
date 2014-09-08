@@ -22,8 +22,8 @@
         <sonar.phpCodesniffer.analyzeOnly>true</sonar.phpCodesniffer.analyzeOnly>
         <sonar.phpDepend.analyzeOnly>true</sonar.phpDepend.analyzeOnly>
         <sonar.phpDepend.reportType>summary-xml</sonar.phpDepend.reportType>
-        <sonar.phpUnit.coverage.analyzeOnly>true</sonar.phpUnit.coverage.analyzeOnly>
-        <sonar.phpUnit.analyzeOnly>true</sonar.phpUnit.analyzeOnly>
+        <sonar.php.coverage.analyzeOnly>true</sonar.php.coverage.analyzeOnly>
+        <sonar.php.analyzeOnly>true</sonar.php.analyzeOnly>
 
         <sonargraph.prepareForSonar>true</sonargraph.prepareForSonar>
     </properties>
