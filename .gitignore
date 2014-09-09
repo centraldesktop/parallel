@@ -4,4 +4,3 @@ target
 *.iml
 **/target/
 vendor
-composer.lock
