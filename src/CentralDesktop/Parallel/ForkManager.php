@@ -142,6 +142,19 @@ class ForkManager implements LoggerAwareInterface {
                         time_nanosleep(0, 500000000); // Sleep for 0.5s
                     }
                     else {
+                        if (pcntl_wifexited($status)) {
+
+                            $code = pcntl_wexitstatus($status);
+                            if ($code != 0) {
+                                $msg = "Child exited abnormally with code $code";
+                                if (extension_loaded('newrelic')) {
+                                    newrelic_notice_error($msg);
+                                }
+                                $this->logger->critical("Process exited abnormally",
+                                                        ['process' => $id, 'code' => $code]);
+                            }
+                        }
+
                         break;
                     }
                 }
