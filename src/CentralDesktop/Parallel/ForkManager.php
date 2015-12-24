@@ -137,7 +137,12 @@ class ForkManager implements LoggerAwareInterface {
                      */
                     $status   = 0;
                     $childpid = pcntl_wait($status, WNOHANG);
+                    // If nothing happened, or an error happened, send out signals and delay
                     if ($childpid === 0) {
+                        pcntl_signal_dispatch();
+                        time_nanosleep(0, 500000000); // Sleep for 0.5s
+                    } elseif ($childpid === -1) {
+                        // Go ahead and dispatch messages and sleep.  We don't want to busy wait.
                         pcntl_signal_dispatch();
                         time_nanosleep(0, 500000000); // Sleep for 0.5s
                     }
@@ -155,13 +160,15 @@ class ForkManager implements LoggerAwareInterface {
                             }
                         }
 
-                        break;
+                        // If this is a known child, exit the loop, so we can re-spawn
+                        // If the child is not known, don't spawn a new child
+                        $this->reap($childpid);
+                        if (array_key_exists ($childpid, $this->pids)) {
+                            break;
+                        }
                     }
                 }
-
-                $this->reap($childpid);
             }
-
         }
         else {
             //child ... 
