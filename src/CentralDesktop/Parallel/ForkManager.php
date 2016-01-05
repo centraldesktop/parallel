@@ -162,8 +162,9 @@ class ForkManager implements LoggerAwareInterface {
 
                         // If this is a known child, exit the loop, so we can re-spawn
                         // If the child is not known, don't spawn a new child
+                        $respawn_child = (array_key_exists($childpid, $this->pids));
                         $this->reap($childpid);
-                        if (array_key_exists ($childpid, $this->pids)) {
+                        if ($respawn_child) {
                             break;
                         }
                     }
