@@ -119,7 +119,7 @@ class ForkManager implements LoggerAwareInterface {
         elseif ($pid) {
             $this->pids[$pid] = $id;
 
-            $this->logger->info("Announcing new process w/ pid ($pid): {$id}");
+            $this->logger->debug("Announcing new process w/ pid ($pid): {$id}");
 
             if (count(array_keys($this->pids)) >= $this->max_processes) {
                 // wait for child to finish so we can start another.
