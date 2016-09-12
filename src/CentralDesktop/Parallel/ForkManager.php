@@ -47,9 +47,9 @@ class ForkManager implements LoggerAwareInterface {
     private $logger;
 
     // Signals that we trap by default
-    protected static $trapped_signals = array(
+    protected static $trapped_signals = [
         SIGHUP, SIGINT, SIGABRT, SIGTERM, SIGQUIT
-    );
+    ];
 
     public
     function __construct($processes = 4, $use_default_sighandler = true) {
@@ -60,9 +60,10 @@ class ForkManager implements LoggerAwareInterface {
 
         // Verify that 'declare(ticks=1)' has been called by the caller.
         // We only need this done once.
-        if (!self::$have_ticks) {
-            $this->setup_ticks();
-        }
+        // @TODO fix for PHP7
+        // if (!self::$have_ticks) {
+        //     $this->setup_ticks();
+        // }
 
         if ($use_default_sighandler) {
             $this->set_default_parent_sighandler();
@@ -74,11 +75,22 @@ class ForkManager implements LoggerAwareInterface {
         return $this->active;
     }
 
+    /**
+    * Sets a static variable to proove we have declare(ticks=1)
+    *  This test fails on PHP7 so we'll disable.
+    */
     public static
     function confirmTicks() {
         self::$have_ticks = true;
     }
 
+    /**
+    *  Appologies for the commented code.
+    *  I would like to restore this functionality eventually.
+    *  this is supposed to verify that ticks is a small enough number, as required
+    *  by pnctl to fork and manage signals but that static var manipulation doesn't
+    *  work from PHP7 so we'll disable for now
+    */
     private
     function setup_ticks() {
         $tick_f = function () {
@@ -97,7 +109,7 @@ class ForkManager implements LoggerAwareInterface {
 
 
         if (self::$have_ticks) {
-            //unregister_tick_function($tick_f);
+            unregister_tick_function($tick_f);
         }
         else {
             die("FM requires a 'declare(ticks=1);' in the calling code.\n");
@@ -107,9 +119,10 @@ class ForkManager implements LoggerAwareInterface {
     public
     function start($id = "Some Random Process") {
         // If the __construct() test failed, retest now.
-        if (!self::$have_ticks) {
-            $this->setup_ticks();
-        }
+        // @TODO fix for PHP7
+        // if (!self::$have_ticks) {
+        //     $this->setup_ticks();
+        // }
 
         $pid = pcntl_fork();
 
@@ -172,7 +185,7 @@ class ForkManager implements LoggerAwareInterface {
             }
         }
         else {
-            //child ... 
+            //child ...
 
             // Setup signal handlers, if any
             foreach (self::$trapped_signals as $signo) {
@@ -330,4 +343,3 @@ class ForkManager implements LoggerAwareInterface {
         $this->logger = $logger;
     }
 }
-
