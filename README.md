@@ -8,7 +8,7 @@ To use:
 
 Add this package to your composer dependencies.
 
-use CentralDesktop\Paralell\ForkManager;
+use CentralDesktop\Parallel\ForkManager;
 
 
 // build an object, limit to total concurrent processes.
